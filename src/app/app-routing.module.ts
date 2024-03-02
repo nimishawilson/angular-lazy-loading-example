@@ -1,12 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PreloadAllModules } from '@angular/router';
+import { CustomPreloadingStrategy } from './custom-preloading-strategy.service';
 
 const routes: Routes = [
   {
     path: 'customers',
     loadChildren: () =>
       import('./customers/customers.module').then((m) => m.CustomersModule),
+      data: { preload: true }
   },
   {
     path: 'orders',
@@ -23,7 +25,8 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      preloadingStrategy: PreloadAllModules // Angular provides a PreloadAllModules strategy, which preloads all lazy-loaded modules
+      // preloadingStrategy: PreloadAllModules // Angular provides a PreloadAllModules strategy, which preloads all lazy-loaded modules
+       preloadingStrategy: CustomPreloadingStrategy 
     })
 ],
   exports: [RouterModule],
