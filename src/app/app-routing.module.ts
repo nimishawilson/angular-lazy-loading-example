@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PreloadAllModules } from '@angular/router';
 import { CustomPreloadingStrategy } from './custom-preloading-strategy.service';
+import { DataResolverService } from './data-resolver.service';
 
 const routes: Routes = [
   {
@@ -14,6 +15,9 @@ const routes: Routes = [
     path: 'orders',
     loadChildren: () =>
       import('./orders/orders.module').then((m) => m.OrdersModule),
+      resolve: {
+        data: DataResolverService
+      },
   },
   {
     path: '',

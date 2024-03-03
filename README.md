@@ -1,27 +1,88 @@
-# LazyLoadingExample
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.4.
+### Resolvers
+Resolvers are used to fetch data before a route is activated. They help ensure that the necessary data is available before rendering the component associated with a route. This can be particularly useful when working with lazy-loaded modules, where you want to load the module and its data only when the associated route is accessed.
 
-## Development server
+**1. Create a Resolver:**
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+First, create a resolver service that implements the Resolve interface provided by Angular. This interface requires you to implement the resolve method, where you can fetch the necessary data.
 
-## Code scaffolding
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+// example-resolver.service.ts
 
-## Build
+import { Injectable } from '@angular/core';
+import { Resolve } from '@angular/router';
+import { Observable } from 'rxjs';
+import { DataService } from './data.service'; // Replace with your actual data service
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+@Injectable({
+  providedIn: 'root'
+})
+export class ExampleResolver implements Resolve<any> {
+  constructor(private dataService: DataService) {}
 
-## Running unit tests
+  resolve(): Observable<any> | Promise<any> | any {
+    // Replace with your data-fetching logic
+    return this.dataService.getData();
+  }
+}
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+**2. Update your Routing Configuration:**
 
-## Further help
+In your routing configuration, associate the resolver with the route where you want to apply lazy loading.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+// app-routing.module.ts
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { ExampleComponent } from './example/example.component'; // Replace with your actual component
+import { ExampleResolver } from './example-resolver.service'; // Replace with the actual resolver
+
+const routes: Routes = [
+  {
+    path: 'lazy-loaded-route',
+    component: ExampleComponent,
+    resolve: {
+      data: ExampleResolver
+    },
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+
+```
+***3. Access Data in the Component:***
+In your component, you can access the resolved data through the ActivatedRoute.
+
+```
+// example.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'app-example',
+  templateUrl: './example.component.html',
+  styleUrls: ['./example.component.css'],
+})
+export class ExampleComponent implements OnInit {
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    // Access resolved data
+    const resolvedData = this.route.snapshot.data['data'];
+    console.log(resolvedData);
+  }
+}
+
+```
+
+With this setup, when a user navigates to the 'lazy-loaded-route', Angular will automatically execute the resolver (ExampleResolver), fetch the data, and only then proceed to load and render the associated component (ExampleComponent).
