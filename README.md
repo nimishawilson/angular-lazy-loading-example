@@ -85,7 +85,9 @@ In app-routing.module.ts, ***PreloadingStrategy: PreloadAllModules*** to preload
 })
 ```
 
-***How to preload selected lazy loaded modules? ***
+
+**How to preload selected lazy loaded modules? ***
+
 
 To load only specific lazy-loaded modules using PreloadingStrategy in Angular, you can create a custom preloading strategy that selectively preloads the modules you want. 
 
