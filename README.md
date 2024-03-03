@@ -1,4 +1,70 @@
 
+## Lazy loading
+Lazy loading is a programming technique that defers the loading of certain resources or modules until they are actually needed. This approach can help improve the initial loading time of an application by loading only the essential components and delaying the loading of non-essential or less frequently used ones.
+
+In the context of web development and Angular, lazy loading refers to loading Angular modules or components only when they are requested, typically based on user interactions such as navigating to a specific route. This is achieved through the Angular Router, which allows you to define routes and load modules on demand.
+
+### Benefits of Lazy Loading in Angular:
+
+Faster Initial Load Time: Lazy loading helps reduce the initial bundle size of your application. Users will only download the code necessary for the features they are currently accessing, leading to faster load times.
+
+Improved Performance: Smaller initial bundles result in quicker loading, especially beneficial for users with slower internet connections or on mobile devices.
+
+Optimized Resource Usage: Resources are loaded on demand, which means that the application uses fewer resources upfront. This can be critical for large-scale applications with numerous features.
+
+Enhanced User Experience: Users can start interacting with the core features of the application more quickly, providing a better overall user experience.
+
+Simplified Development and Maintenance: Lazy loading allows for modularization of your code, making it easier to manage, develop, and maintain different sections of your application independently.
+
+***route configuration***
+import the feature module which needs to implement the lazy loading functionality, against loadChildren key.
+
+```
+const routes: Routes = [
+  { path: 'home', component: HomeComponent },
+  { path: 'lazy', loadChildren: () => import('./lazy/lazy.module').then(m => m.LazyModule) },
+  // Other routes...
+];
+
+@NgModule({
+  imports: [
+    RouterModule.forRoot(routes) //use forRoot in root routing module
+],
+  exports: [RouterModule],
+})
+
+```
+
+
+Add the component in declarations array of the feature module
+
+```
+@NgModule({
+  declarations: [
+    OrdersComponent
+  ],
+  imports: [
+    CommonModule,
+    OrdersRoutingModule
+  ]
+})
+```
+
+
+In feature routing module, add the components and route paths. Use forChild in imports to pass the routes in feature modules.
+
+```
+const routes: Routes = [{ path: '', component: OrdersComponent }];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+
+```
+
+
+
 ### Resolvers
 Resolvers are used to fetch data before a route is activated. They help ensure that the necessary data is available before rendering the component associated with a route. This can be particularly useful when working with lazy-loaded modules, where you want to load the module and its data only when the associated route is accessed.
 
