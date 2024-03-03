@@ -1,5 +1,6 @@
 
-## Lazy loading
+## Lazy loading in Angular
+
 Lazy loading is a programming technique that defers the loading of certain resources or modules until they are actually needed. This approach can help improve the initial loading time of an application by loading only the essential components and delaying the loading of non-essential or less frequently used ones.
 
 In the context of web development and Angular, lazy loading refers to loading Angular modules or components only when they are requested, typically based on user interactions such as navigating to a specific route. This is achieved through the Angular Router, which allows you to define routes and load modules on demand.
@@ -16,8 +17,9 @@ Enhanced User Experience: Users can start interacting with the core features of 
 
 Simplified Development and Maintenance: Lazy loading allows for modularization of your code, making it easier to manage, develop, and maintain different sections of your application independently.
 
-***route configuration***
-import the feature module which needs to implement the lazy loading functionality, against loadChildren key.
+***implementation***
+
+***route configuration*** - import the feature module which needs to implement the lazy loading functionality, against loadChildren key.
 
 ```
 const routes: Routes = [
@@ -63,7 +65,77 @@ const routes: Routes = [{ path: '', component: OrdersComponent }];
 
 ```
 
+### Preloading lazy loaded modules
 
+preloading refers to a strategy where certain modules are loaded in the background, after the initial part of the application has loaded, but before the user requests them. This is done to improve the user experience by reducing the perceived latency when navigating to other parts of the application.
+
+Preloading is different from eager loading. While eager loading loads all modules during the initial application load, preloading loads only a subset of modules after the initial load, based on a predefined strategy. This way, you can strike a balance between initial load time and the time it takes to load additional modules when the user navigates to different sections of the application.
+
+In app-routing.module.ts, ***PreloadingStrategy: PreloadAllModules*** to preload all the lazy loaded module as shown below.
+
+```
+@NgModule({
+  imports: [
+    RouterModule.forRoot(routes, {
+      preloadingStrategy: PreloadAllModules, // Use PreloadAllModules to preload all lazy-loaded modules
+      // Other router configurations...
+    }),
+  ],
+  exports: [RouterModule],
+})
+```
+
+***How to preload selected lazy loaded modules? ***
+
+To load only specific lazy-loaded modules using PreloadingStrategy in Angular, you can create a custom preloading strategy that selectively preloads the modules you want. 
+
+Create a new service as shown below 
+
+```
+// custom-preloading-strategy.ts
+import { PreloadingStrategy, Route } from '@angular/router';
+import { Observable, of } from 'rxjs';
+
+export class CustomPreloadingStrategy implements PreloadingStrategy {
+  preload(route: Route, load: () => Observable<any>): Observable<any> {
+    // Check if the route has a 'data' property and if 'preload' is set to true
+    if (route.data && route.data['preload']) {
+      return load(); // Preload the module if 'preload' is set to true
+    } else {
+      return of(null); // Do not preload the module
+    }
+  }
+}
+
+```
+
+The CustomPreloadingStrategy class implements the PreloadingStrategy interface, and its preload method checks the presence of the preload property in the route's data and preloads the module accordingly.
+
+In app-routing module, set preloadingStrategy as CustomPreloadingStrategy, which is the new service which we created for implementing the logic of which all lazy loaded modules should be loaded. 
+
+```
+//app-routing.module.ts
+@NgModule({
+  imports: [
+    RouterModule.forRoot(routes, {
+       preloadingStrategy: CustomPreloadingStrategy 
+    })
+],
+})
+```
+In routes of app-routing.module.ts, pass the option **data: { preload: true }** for the modules which we want to preload.
+
+```
+const routes: Routes = [
+  {
+    path: 'customers',
+    loadChildren: () =>
+      import('./customers/customers.module').then((m) => m.CustomersModule),
+      data: { preload: true }
+  },
+]
+
+```
 
 ### Resolvers
 Resolvers are used to fetch data before a route is activated. They help ensure that the necessary data is available before rendering the component associated with a route. This can be particularly useful when working with lazy-loaded modules, where you want to load the module and its data only when the associated route is accessed.
